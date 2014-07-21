@@ -31,7 +31,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.hive.common.type.HiveDecimal;
 import org.apache.hive.service.cli.RowSet;
 import org.apache.hive.service.cli.RowSetFactory;
 import org.apache.hive.service.cli.TableSchema;
@@ -59,7 +58,8 @@ import org.apache.hive.service.cli.thrift.TTypeQualifiers;
 public class HiveQueryResultSet extends HiveBaseResultSet {
 
   public static final Log LOG = LogFactory.getLog(HiveQueryResultSet.class);
-
+  public static final int USER_DEFAULT_PRECISION = 10;
+  public static final int USER_DEFAULT_SCALE = 0;
   private TCLIService.Iface client;
   private TOperationHandle stmtHandle;
   private TSessionHandle sessHandle;
@@ -67,6 +67,7 @@ public class HiveQueryResultSet extends HiveBaseResultSet {
   private int fetchSize;
   private int rowsFetched = 0;
 
+  
   private RowSet fetchedRows;
   private Iterator<Object[]> fetchedRowsItr;
   private boolean isClosed = false;
@@ -222,8 +223,8 @@ public class HiveQueryResultSet extends HiveBaseResultSet {
         case DECIMAL_TYPE:
           TTypeQualifierValue prec = tq.getQualifiers().get(TCLIServiceConstants.PRECISION);
           TTypeQualifierValue scale = tq.getQualifiers().get(TCLIServiceConstants.SCALE);
-          ret = new JdbcColumnAttributes(prec == null ? HiveDecimal.USER_DEFAULT_PRECISION : prec.getI32Value(),
-              scale == null ? HiveDecimal.USER_DEFAULT_SCALE : scale.getI32Value());
+          ret = new JdbcColumnAttributes(prec == null ? USER_DEFAULT_PRECISION : prec.getI32Value(),
+              scale == null ? USER_DEFAULT_SCALE : scale.getI32Value());
           break;
         default:
           break;

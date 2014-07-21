@@ -27,8 +27,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.jar.Attributes;
 
-import org.apache.hadoop.hive.metastore.TableType;
-import org.apache.hive.service.cli.GetInfoType;
 import org.apache.hive.service.cli.thrift.TCLIService;
 import org.apache.hive.service.cli.thrift.TGetCatalogsReq;
 import org.apache.hive.service.cli.thrift.TGetCatalogsResp;
@@ -266,7 +264,7 @@ public class HiveDatabaseMetaData implements DatabaseMetaData {
   }
 
   public String getDatabaseProductName() throws SQLException {
-    TGetInfoResp resp = getServerInfo(GetInfoType.CLI_DBMS_NAME.toTGetInfoType());
+    TGetInfoResp resp = getServerInfo(TGetInfoType.CLI_DBMS_NAME);
     return resp.getInfoValue().getStringValue();
   }
 
@@ -275,7 +273,7 @@ public class HiveDatabaseMetaData implements DatabaseMetaData {
       return dbVersion;
     }
 
-    TGetInfoResp resp = getServerInfo(GetInfoType.CLI_DBMS_VER.toTGetInfoType());
+    TGetInfoResp resp = getServerInfo(TGetInfoType.CLI_DBMS_VER);
     this.dbVersion = resp.getInfoValue().getStringValue();
     return dbVersion;
   }

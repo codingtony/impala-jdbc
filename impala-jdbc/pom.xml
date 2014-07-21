@@ -35,13 +35,13 @@
 
     <maven.compiler.plugin.version>3.1</maven.compiler.plugin.version>
 
-    <libthrift.version>0.9.0</libthrift.version>
+    <libthrift.version>0.9.1</libthrift.version>
     <commons-httpclient.version>3.0.1</commons-httpclient.version>
     <commons-logging.version>1.1.3</commons-logging.version>
     <httpcomponents.client.version>4.2.5</httpcomponents.client.version>
     <httpcomponents.core.version>4.2.5</httpcomponents.core.version>
    	<commons-cli.version>1.2</commons-cli.version>
-	<libfb303.version>0.9.0</libfb303.version>
+	<libfb303.version>0.9.1</libfb303.version>
     <jpam.version>1.1</jpam.version>
     <bonecp.version>0.8.0.RELEASE</bonecp.version>
     <hive.version>0.13.1</hive.version>
@@ -62,7 +62,17 @@
   
   </properties>
   <dependencies>
-    
+  
+    <dependency>
+      <groupId>org.apache.thrift</groupId>
+      <artifactId>libthrift</artifactId>
+      <version>${libthrift.version}</version>
+    </dependency>  
+       <dependency>
+        <groupId>org.apache.thrift</groupId>
+        <artifactId>libfb303</artifactId>
+        <version>${libfb303.version}</version>
+      </dependency>      
           <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-common</artifactId>
@@ -75,11 +85,11 @@
           </dependency>
 
       
-		<dependency>
-			<groupId>org.apache.hive</groupId>
-			<artifactId>hive-service</artifactId>
-			<version>${hive.version}</version>
-		</dependency>
+<!-- 		<dependency> -->
+<!-- 			<groupId>org.apache.hive</groupId> -->
+<!-- 			<artifactId>hive-service</artifactId> -->
+<!-- 			<version>${hive.version}</version> -->
+<!-- 		</dependency> -->
 
       
 

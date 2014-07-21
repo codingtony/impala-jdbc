@@ -19,7 +19,6 @@
 package org.apache.hive.jdbc;
 
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.security.KeyStore;
 import java.sql.Array;
 import java.sql.Blob;
@@ -38,7 +37,6 @@ import java.sql.SQLXML;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Struct;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -47,17 +45,8 @@ import java.util.Properties;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
-import javax.security.sasl.Sasl;
-import javax.security.sasl.SaslException;
-
-import org.apache.hadoop.hive.shims.ShimLoader;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hive.service.auth.HiveAuthFactory;
-import org.apache.hive.service.auth.KerberosSaslHelper;
-import org.apache.hive.service.auth.PlainSaslHelper;
-import org.apache.hive.service.auth.SaslQOP;
 import org.apache.hive.service.cli.thrift.TCLIService;
 import org.apache.hive.service.cli.thrift.TCancelDelegationTokenReq;
 import org.apache.hive.service.cli.thrift.TCancelDelegationTokenResp;
@@ -77,6 +66,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.transport.THttpClient;
+import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
 
@@ -249,22 +239,7 @@ public class HiveConnection implements java.sql.Connection {
     DefaultHttpClient httpClient = new DefaultHttpClient();
     // Request interceptor for any request pre-processing logic
     HttpRequestInterceptor requestInterceptor;
-    // If Kerberos
-    if (isKerberosAuthMode()) {
-      if (useSsl) {
-        String msg = "SSL encryption is currently not supported with " +
-            "kerberos authentication";
-        throw new SQLException(msg, " 08S01");
-      }
-      /**
-       * Add an interceptor which sets the appropriate header in the request.
-       * It does the kerberos authentication and get the final service ticket,
-       * for sending to the server before every request.
-       */
-      requestInterceptor = new HttpKerberosRequestInterceptor(
-          sessConfMap.get(HIVE_AUTH_PRINCIPAL), host, getServerHttpUrl(false));
-    }
-    else {
+
       /**
        * Add an interceptor to pass username/password in the header.
        * In https mode, the entire information is encrypted
@@ -299,7 +274,7 @@ public class HiveConnection implements java.sql.Connection {
           throw new SQLException(msg, " 08S01", e);
         }
       }
-    }
+    
     httpClient.addRequestInterceptor(requestInterceptor);
     return httpClient;
   }
@@ -317,95 +292,22 @@ public class HiveConnection implements java.sql.Connection {
    *   Kerberos and Delegation token supports SASL QOP configurations
    */
   private TTransport createBinaryTransport() throws SQLException {
-    try {
-      // handle secure connection if specified
+    // handle secure connection if specified
       if (!HIVE_AUTH_SIMPLE.equals(sessConfMap.get(HIVE_AUTH_TYPE))) {
-        // If Kerberos
-        Map<String, String> saslProps = new HashMap<String, String>();
-        SaslQOP saslQOP = SaslQOP.AUTH;
-        if (sessConfMap.containsKey(HIVE_AUTH_PRINCIPAL)) {
-          if (sessConfMap.containsKey(HIVE_AUTH_QOP)) {
-            try {
-              saslQOP = SaslQOP.fromString(sessConfMap.get(HIVE_AUTH_QOP));
-            } catch (IllegalArgumentException e) {
-              throw new SQLException("Invalid " + HIVE_AUTH_QOP +
-                  " parameter. " + e.getMessage(), "42000", e);
-            }
-          }
-          saslProps.put(Sasl.QOP, saslQOP.toString());
-          saslProps.put(Sasl.SERVER_AUTH, "true");
-          boolean assumeSubject = HIVE_AUTH_KERBEROS_AUTH_TYPE_FROM_SUBJECT.equals(sessConfMap.get(HIVE_AUTH_KERBEROS_AUTH_TYPE));
-          transport = KerberosSaslHelper.getKerberosTransport(
-              sessConfMap.get(HIVE_AUTH_PRINCIPAL), host,
-              HiveAuthFactory.getSocketTransport(host, port, loginTimeout), saslProps, assumeSubject);
-        } else {
-          // If there's a delegation token available then use token based connection
-          String tokenStr = getClientDelegationToken(sessConfMap);
-          if (tokenStr != null) {
-            transport = KerberosSaslHelper.getTokenTransport(tokenStr,
-                host, HiveAuthFactory.getSocketTransport(host, port, loginTimeout), saslProps);
-          } else {
-            // we are using PLAIN Sasl connection with user/password
-            String userName = getUserName();
-            String passwd = getPassword();
-            if (isSslConnection()) {
-              // get SSL socket
-              String sslTrustStore = sessConfMap.get(HIVE_SSL_TRUST_STORE);
-              String sslTrustStorePassword = sessConfMap.get(HIVE_SSL_TRUST_STORE_PASSWORD);
-              if (sslTrustStore == null || sslTrustStore.isEmpty()) {
-                transport = HiveAuthFactory.getSSLSocket(host, port, loginTimeout);
-              } else {
-                transport = HiveAuthFactory.getSSLSocket(host, port, loginTimeout,
-                    sslTrustStore, sslTrustStorePassword);
-              }
-            } else {
-              // get non-SSL socket transport
-              transport = HiveAuthFactory.getSocketTransport(host, port, loginTimeout);
-            }
-            // Overlay the SASL transport on top of the base socket transport (SSL or non-SSL)
-            transport = PlainSaslHelper.getPlainTransport(userName, passwd, transport);
-          }
-        }
+    	  //TODO
       } else {
         // Raw socket connection (non-sasl)
-        transport = HiveAuthFactory.getSocketTransport(host, port, loginTimeout);
+        transport =  new TSocket(host, port, loginTimeout);
       }
-    } catch (SaslException e) {
-      throw new SQLException("Could not create secure connection to "
-          + jdbcURI + ": " + e.getMessage(), " 08S01", e);
-    } catch (TTransportException e) {
-      throw new SQLException("Could not create connection to "
-          + jdbcURI + ": " + e.getMessage(), " 08S01", e);
-    }
     return transport;
   }
 
-  // Lookup the delegation token. First in the connection URL, then Configuration
-  private String getClientDelegationToken(Map<String, String> jdbcConnConf)
-      throws SQLException {
-    String tokenStr = null;
-    if (HIVE_AUTH_TOKEN.equalsIgnoreCase(jdbcConnConf.get(HIVE_AUTH_TYPE))) {
-      // check delegation token in job conf if any
-      try {
-        tokenStr = ShimLoader.getHadoopShims().
-            getTokenStrForm(HiveAuthFactory.HS2_CLIENT_TOKEN);
-      } catch (IOException e) {
-        throw new SQLException("Error reading token ", e);
-      }
-    }
-    return tokenStr;
-  }
+ 
 
   private void openSession(Map<String, String> sessVars) throws SQLException {
     TOpenSessionReq openReq = new TOpenSessionReq();
 
-    // set the session configuration
-    if (sessVars.containsKey(HiveAuthFactory.HS2_PROXY_USER)) {
-      Map<String, String> openConf = new HashMap<String, String>();
-      openConf.put(HiveAuthFactory.HS2_PROXY_USER,
-          sessVars.get(HiveAuthFactory.HS2_PROXY_USER));
-      openReq.setConfiguration(openConf);
-    }
+
 
     try {
       TOpenSessionResp openResp = client.OpenSession(openReq);
@@ -462,10 +364,7 @@ public class HiveConnection implements java.sql.Connection {
     return "true".equalsIgnoreCase(sessConfMap.get(HIVE_USE_SSL));
   }
 
-  private boolean isKerberosAuthMode() {
-    return !HIVE_AUTH_SIMPLE.equals(sessConfMap.get(HIVE_AUTH_TYPE))
-        && sessConfMap.containsKey(HIVE_AUTH_PRINCIPAL);
-  }
+
 
   private boolean isHttpTransportMode() {
     String transportMode = hiveConfMap.get(HIVE_SERVER2_TRANSPORT_MODE);
