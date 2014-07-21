@@ -50,15 +50,15 @@ import java.util.concurrent.TimeUnit;
 import javax.security.sasl.Sasl;
 import javax.security.sasl.SaslException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hive.ql.session.SessionState;
 import org.apache.hadoop.hive.shims.ShimLoader;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hive.service.auth.HiveAuthFactory;
 import org.apache.hive.service.auth.KerberosSaslHelper;
 import org.apache.hive.service.auth.PlainSaslHelper;
 import org.apache.hive.service.auth.SaslQOP;
-import org.apache.hive.service.cli.thrift.EmbeddedThriftBinaryCLIService;
 import org.apache.hive.service.cli.thrift.TCLIService;
 import org.apache.hive.service.cli.thrift.TCancelDelegationTokenReq;
 import org.apache.hive.service.cli.thrift.TCancelDelegationTokenResp;
@@ -115,7 +115,7 @@ public class HiveConnection implements java.sql.Connection {
   private final Map<String, String> sessConfMap;
   private final Map<String, String> hiveConfMap;
   private final Map<String, String> hiveVarMap;
-  private final boolean isEmbeddedMode;
+  
   private TTransport transport;
   private TCLIService.Iface client;   // todo should be replaced by CliServiceClient
   private boolean isClosed = true;
@@ -158,11 +158,8 @@ public class HiveConnection implements java.sql.Connection {
       }
     }
 
-    isEmbeddedMode = connParams.isEmbeddedMode();
+  
 
-    if (isEmbeddedMode) {
-      client = new EmbeddedThriftBinaryCLIService();
-    } else {
       // extract user/password from JDBC connection properties if its not supplied in the
       // connection URL
       if (info.containsKey(HIVE_AUTH_USER)) {
@@ -178,7 +175,7 @@ public class HiveConnection implements java.sql.Connection {
       openTransport();
       // set up the client
       client = new TCLIService.Client(new TBinaryProtocol(transport));
-    }
+    
 
     // add supported protocols
     supportedProtocols.add(TProtocolVersion.HIVE_CLI_SERVICE_PROTOCOL_V1);
@@ -431,11 +428,6 @@ public class HiveConnection implements java.sql.Connection {
 
   private void configureConnection(String dbName) throws SQLException {
     // set the hive variable in session state for local mode
-    if (isEmbeddedMode) {
-      if (!hiveVarMap.isEmpty()) {
-        SessionState.get().setHiveVariables(hiveVarMap);
-      }
-    } else {
       // for remote JDBC client, try to set the conf var using 'set foo=bar'
       Statement stmt = createStatement();
       for (Entry<String, String> hiveConf : hiveConfMap.entrySet()) {
@@ -451,7 +443,6 @@ public class HiveConnection implements java.sql.Connection {
         stmt.execute("use " + dbName);
       }
       stmt.close();
-    }
   }
 
   /**
