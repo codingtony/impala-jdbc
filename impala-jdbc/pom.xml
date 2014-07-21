@@ -40,7 +40,12 @@
     <commons-logging.version>1.1.3</commons-logging.version>
     <httpcomponents.client.version>4.2.5</httpcomponents.client.version>
     <httpcomponents.core.version>4.2.5</httpcomponents.core.version>
-   <commons-cli.version>1.2</commons-cli.version>
+   	<commons-cli.version>1.2</commons-cli.version>
+	<libfb303.version>0.9.0</libfb303.version>
+    <jpam.version>1.1</jpam.version>
+    <bonecp.version>0.8.0.RELEASE</bonecp.version>
+    <hive.version>0.13.1</hive.version>
+	
 
 
 
@@ -57,45 +62,7 @@
   
   </properties>
   <dependencies>
-      <dependency>
-      <groupId>commons-logging</groupId>
-      <artifactId>commons-logging</artifactId>
-      <version>${commons-logging.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpclient</artifactId>
-      <version>${httpcomponents.client.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpcore</artifactId>
-      <version>${httpcomponents.core.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.thrift</groupId>
-      <artifactId>libthrift</artifactId>
-      <version>${libthrift.version}</version>
-    </dependency>
-        <dependency>
-  <groupId>javax.servlet</groupId>
-  <artifactId>servlet-api</artifactId>
-  <version>2.5</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>commons-compress</artifactId>
-        <version>${commons-compress.version}</version>
-      </dependency>
-      
-    <dependency>
-      <groupId>commons-cli</groupId>
-      <artifactId>commons-cli</artifactId>
-      <version>${commons-cli.version}</version>
-    </dependency>
-
-  
+    
           <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-common</artifactId>
@@ -106,11 +73,15 @@
             <artifactId>hadoop-hdfs</artifactId>
             <version>${hadoop-23.version}</version>
           </dependency>
-          <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-mapreduce-client-jobclient</artifactId>
-            <version>${hadoop-23.version}</version>
-          </dependency>
+
+      
+		<dependency>
+			<groupId>org.apache.hive</groupId>
+			<artifactId>hive-service</artifactId>
+			<version>${hive.version}</version>
+		</dependency>
+
+      
 
 </dependencies>
 
