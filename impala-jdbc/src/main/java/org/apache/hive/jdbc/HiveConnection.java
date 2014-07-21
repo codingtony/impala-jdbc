@@ -50,7 +50,6 @@ import java.util.concurrent.TimeUnit;
 import javax.security.sasl.Sasl;
 import javax.security.sasl.SaslException;
 
-import org.apache.hadoop.hive.ql.session.SessionState;
 import org.apache.hadoop.hive.shims.ShimLoader;
 
 import org.apache.commons.logging.Log;
