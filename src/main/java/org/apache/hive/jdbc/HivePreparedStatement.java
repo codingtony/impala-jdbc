@@ -565,8 +565,7 @@ public class HivePreparedStatement extends HiveStatement implements PreparedStat
    */
 
   public void setNull(int parameterIndex, int sqlType) throws SQLException {
-    // TODO Auto-generated method stub
-    throw new SQLException("Method not supported");
+	  this.parameters.put(parameterIndex,null);
   }
 
   /*
@@ -576,8 +575,7 @@ public class HivePreparedStatement extends HiveStatement implements PreparedStat
    */
 
   public void setNull(int paramIndex, int sqlType, String typeName) throws SQLException {
-    // TODO Auto-generated method stub
-    throw new SQLException("Method not supported");
+	  setNull(paramIndex,sqlType);
   }
 
   /*
