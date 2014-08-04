@@ -625,6 +625,9 @@ public class HiveStatement implements java.sql.Statement {
 
   @Override
   public void setFetchDirection(int direction) throws SQLException {
+	  if (ResultSet.FETCH_FORWARD == direction) {
+		  return;
+	  }
     throw new SQLException("Method not supported");
   }
 
