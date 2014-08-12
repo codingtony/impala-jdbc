@@ -11,3 +11,11 @@ By forking, the development of the driver can go faster than the release cycle o
 
 This is the first working version. 
 Kerberos support has been removed for now.
+
+
+See related JIRA Tickets  :
+   * [HIVE-1625](https://issues.apache.org/jira/browse/HIVE-1625)
+   * [HIVE-3625](https://issues.apache.org/jira/browse/HIVE-3625)
+   * [HIVE-4806](https://issues.apache.org/jira/browse/HIVE-4806)
+   * [HIVE-7676](https://issues.apache.org/jira/browse/HIVE-7676)
+   * [IMPALA-1099](https://issues.cloudera.org/browse/IMPALA-1099)
