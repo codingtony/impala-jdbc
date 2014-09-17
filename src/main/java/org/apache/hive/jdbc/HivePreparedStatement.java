@@ -603,6 +603,8 @@ public class HivePreparedStatement extends HiveStatement implements PreparedStat
 	      setByte(parameterIndex, ((Byte) x).byteValue());
 	    } else if (x instanceof Character) {
 	      setString(parameterIndex, ((Character) x).toString());
+	    } else if (x instanceof Enum) {
+	    	setString(parameterIndex, ((Enum<?>) x).name());
 	    } else {
 	      // Can't infer a type.
 	      throw new SQLException(
