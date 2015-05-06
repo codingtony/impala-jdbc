@@ -109,22 +109,14 @@
 					<artifactId>slf4j-log4j12</artifactId>
 				</exclusion>				
 			</exclusions>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-hdfs</artifactId>
 			<version>${hadoop-23.version}</version>
+			<scope>provided</scope>
 		</dependency>
-
-
-		<!-- <dependency> -->
-		<!-- <groupId>org.apache.hive</groupId> -->
-		<!-- <artifactId>hive-service</artifactId> -->
-		<!-- <version>${hive.version}</version> -->
-		<!-- </dependency> -->
-
-
-
 	</dependencies>
 
 	<profiles>
