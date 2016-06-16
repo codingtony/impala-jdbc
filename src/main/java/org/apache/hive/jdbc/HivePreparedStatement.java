@@ -254,8 +254,7 @@ public class HivePreparedStatement extends HiveStatement implements PreparedStat
    */
 
   public void setBigDecimal(int parameterIndex, BigDecimal x) throws SQLException {
-    // TODO Auto-generated method stub
-    throw new SQLException("Method not supported");
+    this.parameters.put(parameterIndex, x.toString());
   }
 
   /*
@@ -603,8 +602,10 @@ public class HivePreparedStatement extends HiveStatement implements PreparedStat
 	      setByte(parameterIndex, ((Byte) x).byteValue());
 	    } else if (x instanceof Character) {
 	      setString(parameterIndex, ((Character) x).toString());
+	    } else if (x instanceof BigDecimal) {
+	      setBigDecimal(parameterIndex, (BigDecimal)x);
 	    } else if (x instanceof Enum) {
-	    	setString(parameterIndex, ((Enum<?>) x).name());
+	      setString(parameterIndex, ((Enum<?>) x).name());
 	    } else {
 	      // Can't infer a type.
 	      throw new SQLException(
@@ -623,8 +624,7 @@ public class HivePreparedStatement extends HiveStatement implements PreparedStat
 
   public void setObject(int parameterIndex, Object x, int targetSqlType)
       throws SQLException {
-    // TODO Auto-generated method stub
-    throw new SQLException("Method not supported");
+	  setObject(parameterIndex, x);
   }
 
   /*
